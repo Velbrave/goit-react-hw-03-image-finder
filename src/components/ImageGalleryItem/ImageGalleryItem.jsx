@@ -1,7 +1,14 @@
-const ImageGalleryItem = () => {
+import css from './ImageGalleryItem.module.css';
+
+const ImageGalleryItem = ({ smallImage, bigImage, openModal }) => {
   return (
-    <li class="gallery-item">
-      <img src="" alt="" />
+    <li className={css.ImageGalleryItem} onClick={openModal}>
+      <img
+        className={css.Image}
+        src={smallImage}
+        alt=""
+        data-image={bigImage}
+      />
     </li>
   );
 };
