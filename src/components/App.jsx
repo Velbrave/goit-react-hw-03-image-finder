@@ -4,7 +4,7 @@ import Modal from './Modal/Modal';
 import Searchbar from './Searchbar/Searchbar';
 import Button from './Button/Button';
 import Loader from './Loader/Loader';
-import { getPost } from 'service/post';
+import { getPost } from '../service/Post';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
