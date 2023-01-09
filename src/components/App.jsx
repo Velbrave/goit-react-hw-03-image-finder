@@ -4,30 +4,21 @@ import Modal from './Modal/Modal';
 import Searchbar from './Searchbar/Searchbar';
 import Button from './Button/Button';
 import Loader from './Loader/Loader';
-import { getPost } from 'service/Post';
+import { getPost } from 'service/post';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export class App extends React.Component {
   state = {
-    images: null,
+    images: [],
     showModal: false,
     searchName: '',
     page: 1,
+    totalHits: 0,
     isLoading: false,
     isError: false,
+    bigImage: '',
   };
-
-  async componentDidMount() {
-    this.setState({ isLoading: true });
-    try {
-      const images = await getPost();
-      this.setState({ images });
-    } catch (error) {
-      this.setState({ isError: true });
-      console.log(error.message);
-    } finally {
-      this.setState({ isLoading: false });
-    }
-  }
 
   async componentDidUpdate(_, prevState) {
     const { page, searchName } = this.state;
@@ -36,9 +27,14 @@ export class App extends React.Component {
       this.setState({ isLoading: true });
       try {
         const images = await getPost(page, searchName);
+        if (images.hits.length === 0) {
+          toast.error(`Nothing found for request: ${searchName}`);
+          return;
+        }
         this.setState(prev => ({
-          images: page > 1 ? [...prev.images, ...images] : images,
+          images: page > 1 ? [...prev.images, ...images.hits] : images.hits,
           page,
+          totalHits: images.total,
         }));
       } catch (error) {
         this.setState({ isError: true });
@@ -50,7 +46,7 @@ export class App extends React.Component {
   }
 
   handleSubmitForm = searchName => {
-    this.setState({ searchName });
+    this.setState({ page: 1, searchName });
   };
 
   handleChangePage = () => {
@@ -68,14 +64,14 @@ export class App extends React.Component {
     if (event.target.nodeName === 'IMG') {
       this.setState(state => ({
         showModal: !state.showModal,
-        bigImage: bigImage,
+        bigImage,
       }));
     }
   };
 
   render() {
-    const { showModal, images, bigImage, isLoading, isError, page } =
-      this.state;
+    const { showModal, images, bigImage, isLoading, isError } = this.state;
+    const itemsPerPage = 12;
 
     if (isError) {
       return <p>Something went wrong...</p>;
@@ -85,14 +81,18 @@ export class App extends React.Component {
       <div>
         <Searchbar onSubmit={this.handleSubmitForm} />
 
-        {images && <ImageGallery images={images} openModal={this.openModal} />}
+        {images.length > 0 ? (
+          <ImageGallery images={images} openModal={this.openModal} />
+        ) : null}
 
         {isLoading && <Loader />}
 
         {showModal && (
           <Modal onClose={this.toggleModal} bigImage={bigImage}></Modal>
         )}
-        {page >= 1 && <Button onClick={this.handleChangePage} />}
+        {images.length > 0 && this.state.totalHits > itemsPerPage && (
+          <Button onClick={this.handleChangePage} />
+        )}
       </div>
     );
   }
