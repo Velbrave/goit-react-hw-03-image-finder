@@ -26,7 +26,7 @@ ImageGallery.protoTypes = {
       id: PropTypes.number.isRequired,
       webformatURL: PropTypes.string.isRequired,
       largeImageURL: PropTypes.string.isRequired,
-      openModal: PropTypes.func,
     })
   ),
+  openModal: PropTypes.func,
 };
